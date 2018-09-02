@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Candidato.cs" />
     <Compile Include="FrmPrincipal.cs">
       <SubType>Form</SubType>
     </Compile>
