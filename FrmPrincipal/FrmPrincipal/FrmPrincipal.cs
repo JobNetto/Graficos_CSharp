@@ -17,20 +17,15 @@ namespace FrmPrincipal
         public FrmPrincipal()
         {
             InitializeComponent();
-            candidatos = new ObservableCollection<Candidato>();
-            candidatos.CollectionChanged += Candidatos_CollectionChanged;
+            candidatos = new List<Candidato>();
+
         }
 
         private List<string> l;
-        private ObservableCollection<Candidato> candidatos { get; set; }
+        private List<Candidato> candidatos { get; set; }
         private void FrmPrincipal_Load(object sender, EventArgs e)
         {
-            
-        }
 
-        private void Candidatos_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {            
-            chart1.Series["Candidato"].Points.AddXY(candidatos.Last().Nome,candidatos.Last().Totalvotos);
         }
 
         private void CarregaCadidatos()
@@ -41,8 +36,7 @@ namespace FrmPrincipal
 
             System.IO.StreamReader file =
     new System.IO.StreamReader(caminho);
-             l = new List<string>();
-                file.ReadLine();
+            l = new List<string>();
             string line = null;
             while (true)
             {
@@ -50,19 +44,20 @@ namespace FrmPrincipal
                 if (line == null) break;
                 l.Add(line);
             }
-             
-            foreach(var i in l)
+
+            foreach (var i in l)
             {
-                candidatos.Add(new Candidato { Nome = i.Split(';')[0], Totalvotos = int.Parse(i.Split(';')[1])  });
+                candidatos.Add(new Candidato { Nome = i.Split(';')[0], Totalvotos = int.Parse(i.Split(';')[1]) });
             }
 
             CarregaChart();
         }
         private void CarregaChart()
         {
+            chart1.Series["Votos"].Points.Clear();
             foreach (var item in candidatos)
             {
-                chart1.Series["Candidato"].Points.AddXY(item.Nome, item.Totalvotos);
+                chart1.Series["Votos"].Points.AddXY(item.Nome, item.Totalvotos);
             }
 
         }
@@ -74,27 +69,44 @@ namespace FrmPrincipal
 
         private void btCadastroCandidato_Click(object sender, EventArgs e)
         {
+            var frm = new FrmCadastro();
+            frm.ShowDialog();
+            candidatos.Add(frm.c);
+            frm.Dispose();
+            chart1.Series["Votos"].Points.AddXY(candidatos.Last().Nome, candidatos.Last().Totalvotos);
 
         }
 
         private void btCadastroVto_Click(object sender, EventArgs e)
         {
+            var frm = new FrmVotos();
+            frm.l = candidatos;
+            frm.ShowDialog();
+            foreach (var i in candidatos)
+            {
+                if (frm.canditadoSelecionado == i.Nome)
+                {
+                    i.Totalvotos += frm.voto;
+                }
+            }
+            frm.Close();
 
+            CarregaChart();
         }
 
         private void btColuna_Click(object sender, EventArgs e)
         {
-            chart1.Series["Candidato"].ChartType = SeriesChartType.Column;
+            chart1.Series["Votos"].ChartType = SeriesChartType.Column;
         }
 
         private void btBarra_Click(object sender, EventArgs e)
         {
-            chart1.Series["Candidato"].ChartType = SeriesChartType.Bar;
+            chart1.Series["Votos"].ChartType = SeriesChartType.Bar;
         }
 
         private void btPizza_Click(object sender, EventArgs e)
         {
-            chart1.Series["Candidato"].ChartType = SeriesChartType.Pie;
+            chart1.Series["Votos"].ChartType = SeriesChartType.Pie;
         }
     }
 }
